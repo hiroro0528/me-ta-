@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+  <!-- iPhoneでの入力時自動ズームを防ぐためのviewport設定 -->
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>POCO METER - ネオン風メーター管理</title>
   
   <!-- Tailwind CSS (デザイン用) -->
@@ -34,6 +35,7 @@
       background-color: #050510;
       color: #e2e8f0;
       overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent; /* タップ時のハイライトを消す */
     }
     
     /* ネオンテキストエフェクト */
@@ -56,18 +58,18 @@
       backdrop-filter: blur(12px);
     }
 
-    /* フォーム入力フィールド */
+    /* フォーム入力フィールド (iOSズーム対策で font-size: 16px 固定) */
     .neon-input {
       width: 100%;
       background-color: #020617;
       border: 1px solid #155e75;
       color: #cffafe;
       border-radius: 0.75rem;
-      padding: 1rem;
+      padding: 0.75rem;
       outline: none;
       transition: all 0.3s;
       font-family: monospace;
-      font-size: 1.125rem;
+      font-size: 16px; 
     }
     .neon-input:focus {
       border-color: #22d3ee;
@@ -106,6 +108,11 @@
     
     /* 非表示ユーティリティ */
     .hidden-section { display: none !important; }
+
+    /* iPhone 14 Pro用の微調整 (スクロールバーを隠すなど) */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
   </style>
 </head>
 <body class="selection:bg-cyan-500/40">
@@ -113,103 +120,103 @@
   <div class="ambient-light-1"></div>
   <div class="ambient-light-2"></div>
 
-  <!-- ヘッダー -->
+  <!-- ヘッダー (スマホ向けにコンパクト化) -->
   <header class="border-b border-slate-800/80 bg-[#050510]/80 sticky top-0 z-50 backdrop-blur-xl">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <h1 class="text-3xl sm:text-4xl font-black italic tracking-widest neon-text-pink">
+    <div class="max-w-5xl mx-auto px-3 py-3 flex flex-col gap-3">
+      <h1 class="text-2xl font-black italic tracking-widest neon-text-pink text-center">
         POCO<span class="neon-text-cyan">METER</span>
       </h1>
-      <nav class="flex p-1 rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm w-full sm:w-auto">
-        <button id="btn-tab-input" onclick="switchTab('input')" class="flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm sm:text-base">
+      <nav class="flex p-1 rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm w-full">
+        <button id="btn-tab-input" onclick="switchTab('input')" class="flex-1 px-4 py-2 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm">
           INPUT
         </button>
-        <button id="btn-tab-list" onclick="switchTab('list')" class="flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm sm:text-base">
+        <button id="btn-tab-list" onclick="switchTab('list')" class="flex-1 px-4 py-2 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm">
           DATA
         </button>
       </nav>
     </div>
   </header>
 
-  <main class="px-4 py-6 relative z-10 pb-24 max-w-5xl mx-auto">
+  <main class="px-3 py-4 relative z-10 pb-24 max-w-5xl mx-auto">
     
     <!-- ==================== 入力ページ ==================== -->
     <section id="page-input" class="animate-fade-in hidden-section">
-      <div class="p-6 sm:p-8 max-w-xl mx-auto mt-4 neon-box-cyan rounded-2xl">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-black flex items-center gap-3 neon-text-cyan" id="form-title">
-            <i data-lucide="activity" class="w-7 h-7"></i>
+      <div class="p-4 sm:p-8 max-w-xl mx-auto mt-2 neon-box-cyan rounded-2xl">
+        <div class="flex justify-between items-center mb-5">
+          <h2 class="text-xl sm:text-2xl font-black flex items-center gap-2 neon-text-cyan" id="form-title">
+            <i data-lucide="activity" class="w-6 h-6"></i>
             NEW RECORD
           </h2>
-          <button id="cancel-edit-btn" onclick="cancelEdit()" class="hidden text-sm text-pink-400 border border-pink-500/50 px-3 py-1 rounded-full hover:bg-pink-950/50 transition-colors">
+          <button id="cancel-edit-btn" onclick="cancelEdit()" class="hidden text-xs text-pink-400 border border-pink-500/50 px-3 py-1 rounded-full hover:bg-pink-950/50 transition-colors">
             キャンセル
           </button>
         </div>
         
-        <form id="record-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+        <form id="record-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
           <input type="hidden" id="edit-id" value="">
           
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-cyan-300 mb-2 font-bold tracking-wider text-sm flex items-center gap-2">
-                <i data-lucide="calendar" class="w-4 h-4"></i> 日付
+              <label class="block text-cyan-300 mb-1.5 font-bold tracking-wider text-xs flex items-center gap-1.5">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i> 日付
               </label>
-              <input type="date" id="input-date" required class="neon-input text-sm sm:text-lg">
+              <input type="date" id="input-date" required class="neon-input">
             </div>
             <div>
-              <label class="block text-cyan-300 mb-2 font-bold tracking-wider text-sm flex items-center gap-2">
-                <i data-lucide="award" class="w-4 h-4"></i> ランク帯
+              <label class="block text-cyan-300 mb-1.5 font-bold tracking-wider text-xs flex items-center gap-1.5">
+                <i data-lucide="award" class="w-3.5 h-3.5"></i> ランク帯
               </label>
-              <select id="input-rank" required class="neon-input text-sm sm:text-lg appearance-none bg-slate-950">
+              <select id="input-rank" required class="neon-input appearance-none bg-slate-950">
                 <!-- JSでオプションを生成 -->
               </select>
             </div>
           </div>
 
-          <div class="p-5 rounded-xl border border-pink-900/50 bg-pink-950/10 space-y-5 relative">
-            <div class="absolute -top-3 left-4 bg-[#050510] px-2 text-pink-400 text-xs font-bold border border-pink-900/50 rounded">通過点</div>
+          <div class="p-4 rounded-xl border border-pink-900/50 bg-pink-950/10 space-y-4 relative mt-2">
+            <div class="absolute -top-3 left-4 bg-[#050510] px-2 text-pink-400 text-[10px] font-bold border border-pink-900/50 rounded">通過点</div>
             <div>
-              <label class="block text-pink-300 mb-2 font-bold tracking-wider text-sm flex items-center gap-2">
-                <i data-lucide="clock" class="w-4 h-4"></i> 1時間前 メーター
+              <label class="block text-pink-300 mb-1.5 font-bold tracking-wider text-xs flex items-center gap-1.5">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i> 1時間前
               </label>
               <input type="number" id="input-meter-1h" required class="neon-input neon-input-pink text-pink-100 placeholder-pink-900/50" placeholder="0">
             </div>
             <div>
-              <label class="block text-pink-300 mb-2 font-bold tracking-wider text-sm flex items-center gap-2">
-                <i data-lucide="clock" class="w-4 h-4"></i> 10分前 メーター
+              <label class="block text-pink-300 mb-1.5 font-bold tracking-wider text-xs flex items-center gap-1.5">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i> 10分前
               </label>
               <input type="number" id="input-meter-10m" required class="neon-input neon-input-pink text-pink-100 placeholder-pink-900/50" placeholder="0">
             </div>
           </div>
 
           <div>
-            <label class="block text-cyan-300 mb-2 font-bold tracking-wider text-sm flex items-center gap-2">
-              <i data-lucide="alert-circle" class="w-4 h-4"></i> 締め時間 メーター
+            <label class="block text-cyan-300 mb-1.5 font-bold tracking-wider text-xs flex items-center gap-1.5">
+              <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> 締め時間
             </label>
-            <input type="number" id="input-meter-end" required class="neon-input text-2xl font-bold" placeholder="0">
+            <input type="number" id="input-meter-end" required class="neon-input text-xl font-bold" placeholder="0">
           </div>
 
           <div>
-            <label class="block text-purple-300 mb-3 font-bold tracking-wider text-sm flex items-center gap-2">
-              <i data-lucide="zap" class="w-4 h-4"></i> イベント影響力
+            <label class="block text-purple-300 mb-2 font-bold tracking-wider text-xs flex items-center gap-1.5">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i> イベント影響力
             </label>
-            <div class="flex gap-3">
+            <div class="flex gap-2">
               <label class="flex-1 cursor-pointer">
                 <input type="radio" name="impact" value="大" class="hidden">
-                <div class="text-center py-3 px-2 rounded-xl border-2 border-purple-900/50 text-purple-600 hover:border-purple-600 transition-all font-bold tracking-wider text-sm sm:text-base">大</div>
+                <div class="text-center py-2.5 px-2 rounded-xl border-2 border-purple-900/50 text-purple-600 transition-all font-bold tracking-wider text-sm">大</div>
               </label>
               <label class="flex-1 cursor-pointer">
                 <input type="radio" name="impact" value="中" checked class="hidden">
-                <div class="text-center py-3 px-2 rounded-xl border-2 border-purple-900/50 text-purple-600 hover:border-purple-600 transition-all font-bold tracking-wider text-sm sm:text-base">中</div>
+                <div class="text-center py-2.5 px-2 rounded-xl border-2 border-purple-900/50 text-purple-600 transition-all font-bold tracking-wider text-sm">中</div>
               </label>
               <label class="flex-1 cursor-pointer">
                 <input type="radio" name="impact" value="小" class="hidden">
-                <div class="text-center py-3 px-2 rounded-xl border-2 border-purple-900/50 text-purple-600 hover:border-purple-600 transition-all font-bold tracking-wider text-sm sm:text-base">小</div>
+                <div class="text-center py-2.5 px-2 rounded-xl border-2 border-purple-900/50 text-purple-600 transition-all font-bold tracking-wider text-sm">小</div>
               </label>
             </div>
           </div>
 
-          <button type="submit" id="submit-btn" class="w-full py-4 mt-8 rounded-xl font-black text-lg text-white border-2 border-cyan-400 bg-cyan-950/60 hover:bg-cyan-500 hover:text-cyan-950 hover:shadow-[0_0_25px_rgba(34,211,238,0.9)] transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(34,211,238,0.4)]">
-            <i data-lucide="save" class="w-6 h-6"></i>
+          <button type="submit" id="submit-btn" class="w-full py-3.5 mt-6 rounded-xl font-black text-base text-white border-2 border-cyan-400 bg-cyan-950/60 transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(34,211,238,0.4)] active:scale-95">
+            <i data-lucide="save" class="w-5 h-5"></i>
             <span>SAVE DATA</span>
           </button>
         </form>
@@ -218,12 +225,12 @@
 
     <!-- ==================== データ一覧ページ ==================== -->
     <section id="page-list" class="animate-fade-in hidden-section">
-      <div class="max-w-4xl mx-auto mt-4 space-y-6">
+      <div class="max-w-4xl mx-auto mt-2 space-y-4">
         
         <!-- コントロールパネル（フィルター ＆ 表示切替） -->
-        <div class="neon-box-purple p-4 rounded-2xl flex flex-col md:flex-row justify-between gap-4 items-center">
-          <div class="flex gap-2 w-full md:w-auto">
-            <select id="filter-rank" onchange="renderData()" class="bg-slate-950 border border-purple-500/50 text-purple-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 text-sm flex-1">
+        <div class="neon-box-purple p-3 rounded-2xl flex flex-col gap-3">
+          <div class="flex gap-2 w-full">
+            <select id="filter-rank" onchange="renderData()" class="bg-slate-950 border border-purple-500/50 text-purple-200 rounded-lg px-2 py-2 outline-none focus:border-purple-400 text-xs flex-1">
               <option value="all">全ランク帯</option>
               <option value="S">S帯のみ</option>
               <option value="A">A帯のみ</option>
@@ -232,7 +239,7 @@
               <option value="D">D帯のみ</option>
               <option value="E">E帯のみ</option>
             </select>
-            <select id="filter-impact" onchange="renderData()" class="bg-slate-950 border border-purple-500/50 text-purple-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 text-sm flex-1">
+            <select id="filter-impact" onchange="renderData()" class="bg-slate-950 border border-purple-500/50 text-purple-200 rounded-lg px-2 py-2 outline-none focus:border-purple-400 text-xs flex-1">
               <option value="all">全影響力</option>
               <option value="大">影響力: 大</option>
               <option value="中">影響力: 中</option>
@@ -240,28 +247,30 @@
             </select>
           </div>
           
-          <div class="flex p-1 bg-slate-900 rounded-lg border border-slate-700 w-full md:w-auto">
-            <button onclick="switchViewMode('list')" id="btn-view-list" class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-1.5 rounded-md text-sm font-bold transition-all bg-purple-900/60 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.3)] border border-purple-500/50">
-              <i data-lucide="list" class="w-4 h-4"></i> LIST
+          <div class="flex p-1 bg-slate-900 rounded-lg border border-slate-700 w-full">
+            <button onclick="switchViewMode('list')" id="btn-view-list" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all bg-purple-900/60 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.3)] border border-purple-500/50">
+              <i data-lucide="list" class="w-3.5 h-3.5"></i> LIST
             </button>
-            <button onclick="switchViewMode('graph')" id="btn-view-graph" class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-1.5 rounded-md text-sm font-bold transition-all text-slate-500 hover:text-purple-400 border border-transparent">
-              <i data-lucide="line-chart" class="w-4 h-4"></i> GRAPH
+            <button onclick="switchViewMode('graph')" id="btn-view-graph" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all text-slate-500 hover:text-purple-400 border border-transparent">
+              <i data-lucide="line-chart" class="w-3.5 h-3.5"></i> GRAPH
             </button>
           </div>
         </div>
 
         <!-- リスト表示エリア -->
-        <div id="view-list-area" class="space-y-6">
-          <div id="records-container" class="space-y-6">
+        <div id="view-list-area" class="space-y-4">
+          <div id="records-container" class="space-y-4">
             <!-- JSでレコードがここに挿入されます -->
           </div>
         </div>
 
         <!-- グラフ表示エリア -->
-        <div id="view-graph-area" class="hidden-section neon-box-cyan p-4 sm:p-6 rounded-2xl w-full overflow-x-auto">
-          <div style="min-width: 600px; height: 400px;">
+        <div id="view-graph-area" class="hidden-section neon-box-cyan p-3 sm:p-6 rounded-2xl w-full overflow-x-auto">
+          <!-- iPhoneサイズでもグラフを見やすくするため、最低幅を設定し横スクロールを促す -->
+          <div style="min-width: 500px; height: 350px;">
             <canvas id="meterChart"></canvas>
           </div>
+          <p class="text-center text-[10px] text-cyan-500/50 mt-2">※グラフは横にスクロールできます</p>
         </div>
 
       </div>
@@ -269,9 +278,9 @@
   </main>
 
   <!-- トースト通知 -->
-  <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full border-2 z-50 flex items-center gap-3 bg-cyan-950/90 border-cyan-500 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.6)] backdrop-blur-md opacity-0 pointer-events-none">
-    <i data-lucide="check-circle" class="w-5 h-5"></i>
-    <span id="toast-msg" class="font-bold tracking-wider text-sm sm:text-base">保存しました</span>
+  <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 px-5 py-2.5 rounded-full border-2 z-50 flex items-center gap-2 bg-cyan-950/90 border-cyan-500 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.6)] backdrop-blur-md opacity-0 pointer-events-none">
+    <i data-lucide="check-circle" class="w-4 h-4"></i>
+    <span id="toast-msg" class="font-bold tracking-wider text-xs sm:text-sm">保存しました</span>
   </div>
 
   <script>
@@ -332,19 +341,19 @@
 
       // スタイルリセット
       const inactiveClass = 'text-slate-500 hover:text-cyan-400 bg-transparent border-transparent shadow-none';
-      btnInput.className = `flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm sm:text-base ${inactiveClass}`;
-      btnList.className = `flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm sm:text-base ${inactiveClass}`;
+      btnInput.className = `flex-1 px-4 py-2 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm ${inactiveClass}`;
+      btnList.className = `flex-1 px-4 py-2 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm ${inactiveClass}`;
 
       if (tabName === 'input') {
         pageInput.classList.remove('hidden-section');
         pageList.classList.add('hidden-section');
         
-        btnInput.className = 'flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm sm:text-base bg-cyan-950 border border-cyan-500 shadow-[0_0_15px_rgba(34,211,238,0.3)] text-cyan-200 neon-text-cyan';
+        btnInput.className = 'flex-1 px-4 py-2 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm bg-cyan-950 border border-cyan-500 shadow-[0_0_15px_rgba(34,211,238,0.3)] text-cyan-200 neon-text-cyan';
       } else {
         pageInput.classList.add('hidden-section');
         pageList.classList.remove('hidden-section');
         
-        btnList.className = 'flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm sm:text-base bg-pink-950 border border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.3)] text-pink-200 neon-text-pink';
+        btnList.className = 'flex-1 px-4 py-2 rounded-lg font-bold tracking-wider transition-all duration-300 text-sm bg-pink-950 border border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.3)] text-pink-200 neon-text-pink';
         
         // リストタブを開いた時にデータを描画
         renderData();
@@ -360,8 +369,8 @@
       const btnList = document.getElementById('btn-view-list');
       const btnGraph = document.getElementById('btn-view-graph');
 
-      const activeStyle = "flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-1.5 rounded-md text-sm font-bold transition-all bg-purple-900/60 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.3)] border border-purple-500/50";
-      const inactiveStyle = "flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-1.5 rounded-md text-sm font-bold transition-all text-slate-500 hover:text-purple-400 border border-transparent";
+      const activeStyle = "flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all bg-purple-900/60 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.3)] border border-purple-500/50";
+      const inactiveStyle = "flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all text-slate-500 hover:text-purple-400 border border-transparent";
 
       if (mode === 'list') {
         areaList.classList.remove('hidden-section');
@@ -386,10 +395,10 @@
       msg.textContent = message;
       
       if (isError) {
-        toast.className = "fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full border-2 z-50 flex items-center gap-3 bg-red-950/90 border-red-500 text-red-100 shadow-[0_0_20px_rgba(239,68,68,0.6)] backdrop-blur-md transition-all duration-300 opacity-100 pointer-events-auto show";
+        toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 px-5 py-2.5 rounded-full border-2 z-50 flex items-center gap-2 bg-red-950/90 border-red-500 text-red-100 shadow-[0_0_20px_rgba(239,68,68,0.6)] backdrop-blur-md transition-all duration-300 opacity-100 pointer-events-auto show";
         icon.setAttribute('data-lucide', 'alert-circle');
       } else {
-        toast.className = "fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full border-2 z-50 flex items-center gap-3 bg-cyan-950/90 border-cyan-500 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.6)] backdrop-blur-md transition-all duration-300 opacity-100 pointer-events-auto show";
+        toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 px-5 py-2.5 rounded-full border-2 z-50 flex items-center gap-2 bg-cyan-950/90 border-cyan-500 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.6)] backdrop-blur-md transition-all duration-300 opacity-100 pointer-events-auto show";
         icon.setAttribute('data-lucide', 'check-circle');
       }
       lucide.createIcons();
@@ -476,10 +485,10 @@
       });
 
       // UI変更
-      document.getElementById('form-title').innerHTML = '<i data-lucide="edit" class="w-7 h-7"></i>EDIT RECORD';
+      document.getElementById('form-title').innerHTML = '<i data-lucide="edit" class="w-6 h-6"></i>EDIT RECORD';
       const btn = document.getElementById('submit-btn');
-      btn.innerHTML = '<i data-lucide="refresh-cw" class="w-6 h-6"></i><span>UPDATE DATA</span>';
-      btn.className = "w-full py-4 mt-8 rounded-xl font-black text-lg text-white border-2 border-pink-400 bg-pink-950/60 hover:bg-pink-500 hover:text-pink-950 hover:shadow-[0_0_25px_rgba(236,72,153,0.9)] transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(236,72,153,0.4)]";
+      btn.innerHTML = '<i data-lucide="refresh-cw" class="w-5 h-5"></i><span>UPDATE DATA</span>';
+      btn.className = "w-full py-3.5 mt-6 rounded-xl font-black text-base text-white border-2 border-pink-400 bg-pink-950/60 transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(236,72,153,0.4)] active:scale-95";
       document.getElementById('cancel-edit-btn').classList.remove('hidden');
 
       lucide.createIcons();
@@ -494,16 +503,16 @@
       // 日付を今日に戻す
       document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
       
-      document.getElementById('form-title').innerHTML = '<i data-lucide="activity" class="w-7 h-7"></i>NEW RECORD';
+      document.getElementById('form-title').innerHTML = '<i data-lucide="activity" class="w-6 h-6"></i>NEW RECORD';
       const btn = document.getElementById('submit-btn');
-      btn.innerHTML = '<i data-lucide="save" class="w-6 h-6"></i><span>SAVE DATA</span>';
-      btn.className = "w-full py-4 mt-8 rounded-xl font-black text-lg text-white border-2 border-cyan-400 bg-cyan-950/60 hover:bg-cyan-500 hover:text-cyan-950 hover:shadow-[0_0_25px_rgba(34,211,238,0.9)] transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(34,211,238,0.4)]";
+      btn.innerHTML = '<i data-lucide="save" class="w-5 h-5"></i><span>SAVE DATA</span>';
+      btn.className = "w-full py-3.5 mt-6 rounded-xl font-black text-base text-white border-2 border-cyan-400 bg-cyan-950/60 transition-all flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(34,211,238,0.4)] active:scale-95";
       document.getElementById('cancel-edit-btn').classList.add('hidden');
       
       lucide.createIcons();
     }
 
-    // 削除機能（必要に応じて）
+    // 削除機能
     function deleteRecord(id) {
       if(confirm('このデータを削除してもよろしいですか？')) {
         records = records.filter(r => r.id !== id);
@@ -522,7 +531,7 @@
       const filterImpact = document.getElementById('filter-impact').value;
 
       return records.filter(rec => {
-        // ランク帯フィルター (前方一致: S帯ならS1, S2, S3を含む)
+        // ランク帯フィルター
         const matchRank = filterRank === 'all' || rec.rank.startsWith(filterRank);
         // 影響力フィルター
         const matchImpact = filterImpact === 'all' || rec.impact === filterImpact;
@@ -539,15 +548,15 @@
       }
     }
 
-    // リスト領域の描画
+    // リスト領域の描画 (スマホ表示に最適化)
     function renderList() {
       const container = document.getElementById('records-container');
       const filtered = getFilteredRecords();
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="p-10 text-center text-cyan-600 neon-box-cyan border-dashed rounded-xl">
-            該当するデータがありません。<br>入力タブから記録を追加してください。
+          <div class="p-8 text-center text-cyan-600 neon-box-cyan border-dashed rounded-xl text-sm">
+            該当するデータがありません。<br>INPUTから記録を追加してください。
           </div>
         `;
         return;
@@ -569,70 +578,55 @@
         else if(rec.rank.startsWith('D')) rankColorClass = "text-green-400 [text-shadow:0_0_10px_#4ade80]";
 
         html += `
-          <div class="p-4 sm:p-6 neon-box-purple flex flex-col gap-5 relative group">
+          <div class="p-4 neon-box-purple flex flex-col relative group">
             
-            <!-- 編集ボタン -->
-            <button onclick="editRecord('${rec.id}')" class="absolute top-4 right-4 p-2 bg-slate-800 hover:bg-pink-900/80 text-slate-400 hover:text-pink-200 rounded-lg transition-colors z-10 border border-transparent hover:border-pink-500" title="編集">
-              <i data-lucide="edit-3" class="w-4 h-4"></i>
-            </button>
-            <button onclick="deleteRecord('${rec.id}')" class="absolute top-4 right-14 p-2 bg-slate-800 hover:bg-red-900/80 text-slate-400 hover:text-red-200 rounded-lg transition-colors z-10 border border-transparent hover:border-red-500 opacity-0 group-hover:opacity-100 md:opacity-100" title="削除">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
+            <!-- 編集・削除ボタン (スマホでも押しやすい右上に配置) -->
+            <div class="absolute top-3 right-3 flex gap-1 z-10">
+              <button onclick="editRecord('${rec.id}')" class="p-2 bg-slate-900/80 hover:bg-pink-900/80 text-slate-400 hover:text-pink-200 rounded-lg transition-colors border border-transparent hover:border-pink-500" title="編集">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+              </button>
+              <button onclick="deleteRecord('${rec.id}')" class="p-2 bg-slate-900/80 hover:bg-red-900/80 text-slate-400 hover:text-red-200 rounded-lg transition-colors border border-transparent hover:border-red-500" title="削除">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
 
             <!-- ヘッダー部分：日付とタグ -->
-            <div class="flex flex-wrap items-center gap-4 border-b border-purple-900/30 pb-3">
-              <div class="text-xl sm:text-2xl font-black tracking-widest neon-text-purple">
+            <div class="flex items-end gap-3 border-b border-purple-900/30 pb-2 mb-3 pr-16">
+              <div class="text-xl font-black tracking-widest neon-text-purple leading-none">
                 ${rec.date.replace(/-/g, '/')}
               </div>
-              <div class="text-lg font-black bg-slate-900 px-3 py-1 rounded border border-slate-700 ${rankColorClass}">
+              <div class="text-sm font-black bg-slate-900 px-2 py-0.5 rounded border border-slate-700 ${rankColorClass}">
                 ${rec.rank}
               </div>
-              <div class="text-xs sm:text-sm px-3 py-1 rounded-full border border-purple-500 text-purple-200 shadow-[0_0_8px_rgba(168,85,247,0.4)] bg-purple-950/50 flex items-center gap-1">
-                <i data-lucide="zap" class="w-3 h-3 text-purple-400"></i>
-                影響力: <span class="font-bold text-white">${rec.impact}</span>
+              <div class="text-[10px] px-2 py-0.5 rounded-full border border-purple-500 text-purple-200 shadow-[0_0_8px_rgba(168,85,247,0.4)] bg-purple-950/50 flex items-center gap-1">
+                <i data-lucide="zap" class="w-2.5 h-2.5 text-purple-400"></i>
+                <span class="font-bold">${rec.impact}</span>
               </div>
             </div>
             
-            <!-- 数値部分 -->
-            <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1.2fr] gap-2 md:gap-4 items-center">
+            <!-- 数値部分 (iPhone対応: 3カラム横並びグリッド) -->
+            <div class="grid grid-cols-3 gap-2 items-stretch">
               
               <!-- 1時間前 -->
-              <div class="bg-slate-950/80 p-3 rounded-xl border border-pink-900/50 text-center flex flex-col justify-center">
-                <span class="text-[10px] font-bold text-pink-500/70 mb-1 tracking-wider">1時間前</span>
-                <span class="text-lg sm:text-xl font-mono neon-text-pink">${rec.meter1h.toLocaleString()}</span>
-              </div>
-              
-              <!-- 矢印＆差分1 -->
-              <div class="flex md:flex-col items-center justify-center text-slate-500 px-2 py-1 md:py-0">
-                <i data-lucide="chevron-right" class="hidden md:block w-5 h-5 text-slate-600 mb-1"></i>
-                <i data-lucide="chevron-down" class="block md:hidden w-4 h-4 text-slate-600 mr-2"></i>
-                <span class="text-xs font-bold text-green-400 [text-shadow:0_0_5px_rgba(74,222,128,0.5)]">+${diff1.toLocaleString()}</span>
+              <div class="bg-slate-950/80 p-2 rounded-lg border border-pink-900/50 flex flex-col items-center justify-center text-center">
+                <span class="text-[9px] font-bold text-pink-500/70 mb-0.5">1時間前</span>
+                <span class="text-sm sm:text-base font-mono neon-text-pink">${rec.meter1h.toLocaleString()}</span>
+                <span class="text-[9px] font-bold text-green-400 mt-1 bg-green-900/20 px-1 rounded-sm">+${diff1.toLocaleString()}</span>
               </div>
               
               <!-- 10分前 -->
-              <div class="bg-slate-950/80 p-3 rounded-xl border border-pink-900/50 text-center flex flex-col justify-center">
-                <span class="text-[10px] font-bold text-pink-500/70 mb-1 tracking-wider">10分前</span>
-                <span class="text-lg sm:text-xl font-mono neon-text-pink">${rec.meter10m.toLocaleString()}</span>
-              </div>
-              
-              <!-- 矢印＆差分2 -->
-              <div class="flex md:flex-col items-center justify-center text-slate-500 px-2 py-1 md:py-0">
-                <i data-lucide="chevron-right" class="hidden md:block w-5 h-5 text-slate-600 mb-1"></i>
-                <i data-lucide="chevron-down" class="block md:hidden w-4 h-4 text-slate-600 mr-2"></i>
-                <span class="text-xs font-bold text-green-400 [text-shadow:0_0_5px_rgba(74,222,128,0.5)]">+${diff2.toLocaleString()}</span>
+              <div class="bg-slate-950/80 p-2 rounded-lg border border-pink-900/50 flex flex-col items-center justify-center text-center">
+                <span class="text-[9px] font-bold text-pink-500/70 mb-0.5">10分前</span>
+                <span class="text-sm sm:text-base font-mono neon-text-pink">${rec.meter10m.toLocaleString()}</span>
+                <span class="text-[9px] font-bold text-green-400 mt-1 bg-green-900/20 px-1 rounded-sm">+${diff2.toLocaleString()}</span>
               </div>
               
               <!-- 締め時間 -->
-              <div class="bg-slate-950/80 p-4 rounded-xl border-2 border-cyan-800 text-center flex flex-col justify-center relative overflow-hidden group hover:border-cyan-400 transition-colors">
-                <div class="absolute inset-0 bg-cyan-500/5 group-hover:bg-cyan-500/10 transition-colors"></div>
-                <span class="text-xs font-bold text-cyan-400/80 mb-1 tracking-wider relative z-10">締め時間</span>
-                <span class="text-2xl sm:text-3xl font-black font-mono neon-text-cyan relative z-10">${rec.meterEnd.toLocaleString()}</span>
-                
-                <!-- 総上がり幅 -->
-                <div class="mt-2 pt-2 border-t border-cyan-900/50 relative z-10 flex justify-between items-center px-1">
-                  <span class="text-[10px] text-slate-400">総上がり幅</span>
-                  <span class="text-sm font-bold neon-text-green">+${totalDiff.toLocaleString()}</span>
-                </div>
+              <div class="bg-slate-950/80 p-2 rounded-lg border-2 border-cyan-800 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-cyan-500/5"></div>
+                <span class="text-[9px] font-bold text-cyan-400/80 mb-0.5 relative z-10">締め時間</span>
+                <span class="text-base sm:text-lg font-black font-mono neon-text-cyan relative z-10">${rec.meterEnd.toLocaleString()}</span>
+                <span class="text-[9px] font-bold text-green-400 mt-1 relative z-10 bg-green-900/20 px-1.5 rounded-sm">総+${totalDiff.toLocaleString()}</span>
               </div>
               
             </div>
@@ -641,7 +635,7 @@
       });
 
       container.innerHTML = html;
-      lucide.createIcons(); // 新しく生成したHTML内のアイコンを描画
+      lucide.createIcons(); 
     }
 
     // グラフ領域の描画
@@ -649,19 +643,17 @@
       const ctx = document.getElementById('meterChart').getContext('2d');
       const filtered = getFilteredRecords();
       
-      // グラフは日付の古い順（昇順）で表示するため反転
       const sorted = [...filtered].reverse();
 
-      const labels = sorted.map(r => r.date.substring(5).replace('-', '/')); // MM/DD
+      const labels = sorted.map(r => r.date.substring(5).replace('-', '/')); 
       const data1h = sorted.map(r => r.meter1h);
       const data10m = sorted.map(r => r.meter10m);
       const dataEnd = sorted.map(r => r.meterEnd);
 
       if (chartInstance) {
-        chartInstance.destroy(); // 既存のグラフを破棄
+        chartInstance.destroy();
       }
 
-      // Chart.js の設定（サイバーパンク/ネオン風）
       Chart.defaults.color = '#94a3b8';
       Chart.defaults.font.family = '"Courier New", monospace';
 
@@ -673,7 +665,7 @@
             {
               label: '1時間前',
               data: data1h,
-              borderColor: '#db2777', // pink-600
+              borderColor: '#db2777', 
               backgroundColor: 'rgba(219, 39, 119, 0.1)',
               borderWidth: 2,
               pointBackgroundColor: '#0f172a',
@@ -684,7 +676,7 @@
             {
               label: '10分前',
               data: data10m,
-              borderColor: '#f472b6', // pink-400
+              borderColor: '#f472b6', 
               backgroundColor: 'rgba(244, 114, 182, 0.1)',
               borderWidth: 2,
               borderDash: [5, 5],
@@ -696,16 +688,16 @@
             {
               label: '締め時間',
               data: dataEnd,
-              borderColor: '#22d3ee', // cyan-400
+              borderColor: '#22d3ee', 
               backgroundColor: 'rgba(34, 211, 238, 0.2)',
               borderWidth: 3,
               pointBackgroundColor: '#22d3ee',
               pointBorderColor: '#fff',
               pointBorderWidth: 1,
-              pointRadius: 5,
-              pointHoverRadius: 7,
+              pointRadius: 4,
+              pointHoverRadius: 6,
               tension: 0.3,
-              fill: true // エリアグラフ風
+              fill: true
             }
           ]
         },
@@ -715,7 +707,7 @@
           plugins: {
             legend: {
               position: 'top',
-              labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' } }
+              labels: { color: '#cbd5e1', font: { size: 10, weight: 'bold' }, boxWidth: 12 }
             },
             tooltip: {
               backgroundColor: 'rgba(15, 23, 42, 0.9)',
@@ -723,17 +715,21 @@
               bodyColor: '#e2e8f0',
               borderColor: '#38bdf8',
               borderWidth: 1,
-              padding: 10,
-              boxPadding: 4
+              padding: 8,
+              boxPadding: 4,
+              titleFont: { size: 12 },
+              bodyFont: { size: 12 }
             }
           },
           scales: {
             x: {
-              grid: { color: 'rgba(51, 65, 85, 0.4)', drawBorder: false }
+              grid: { color: 'rgba(51, 65, 85, 0.4)', drawBorder: false },
+              ticks: { font: { size: 10 } }
             },
             y: {
               grid: { color: 'rgba(51, 65, 85, 0.4)', drawBorder: false },
               ticks: {
+                font: { size: 10 },
                 callback: function(value) { return value.toLocaleString(); }
               }
             }
